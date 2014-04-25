@@ -12,9 +12,23 @@
 
     <title>Statistical Analysis</title>
 
-  
+    <!-- Bootstrap core CSS -->
     <link href="bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
     <link href="jumbotron-narrow.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy this line! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+	
+	<script src="http://code.jquery.com/jquery.min.js"></script>
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
   </head>
 
   <body>
@@ -22,32 +36,33 @@
     <div class="container">
       <div class="header">
 	  <ul class="nav nav-pills pull-right">
-          <li><a href="http://jagannath.pdn.cam.ac.uk/ant5/index.html">Home</a></li>
-          <li><a href="http://jagannath.pdn.cam.ac.uk/ant5/help.html">Help</a></li>
+          <li><a href="http://jagannath.pdn.cam.ac.uk/ant5/home.php">Home</a></li>
+          <li><a href="http://jagannath.pdn.cam.ac.uk/ant5/about.php">About</a></li>
           <li><a href="http://jagannath.pdn.cam.ac.uk/ant5/contact.php">Contact</a></li>
         </ul>
         <h3 class="text-muted">Statistical analysis of RDF Linked data</h3>
       </div>
 
 		<ol class="breadcrumb">
-		<li><a href="http://jagannath.pdn.cam.ac.uk/ant5/index.html">Home</a></li>
+		<li><a href="http://jagannath.pdn.cam.ac.uk/ant5/home.php">Home</a></li>
 		<li class="active">Retrieve data via SPARQL query</li>
 		</ol>
     <!--****** ALL THE PHP WORK HERE ******* -->
 	      	
 <?php
-// define variables and set to empty values
-$comment = $database = "";
+// define variables and set to empty values this is used to remember the fields completed
+$queryInput = $database = "";
 
 	if ($_SERVER["REQUEST_METHOD"] == "POST")
 	{
-		if (empty($_POST["comment"]))
+		if (empty($_POST["queryInput"]))
 		{
-			$comment = "";
+			$queryInput = "";
 		}
+
 		else
 		{
-			$comment = test_input($_POST["comment"]);
+			$queryInput = test_input($_POST["queryInput"]);
 		}
 	
 		if (empty($_POST["database"]))
@@ -57,10 +72,8 @@ $comment = $database = "";
 		else
 		{
 			$database = test_input($_POST["database"]);
-		}
-		
+		}		
 	}
-
 
 	function test_input($data)
 	{
@@ -68,19 +81,23 @@ $comment = $database = "";
 		$data = stripslashes($data);
 		$data = htmlspecialchars($data);
 		return $data;
-}
+	}
 ?>
-
-	<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>#results"> 
-	
-	<div class="jumbotron">
-             	
-		<h2> Enter Database Endpoint: </h2>
-		<textarea name="database" cols="80" rows="1" style="resize: none;" data-role="none">https://www.ebi.ac.uk/rdf/services/atlas/sparql</textarea>
-		<br><br>
+	 
+		<form id="queryform" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>#results"> 
+		<div class="jumbotron">
+            <div class="form-group">
+				<label for="database" class="col-sm-2 control-label">Enter Database Endpoint: </label>
+				<div class="col-sm-10">
+				<input type="text" class="form-control" name ="database" id="database" placeholder="Enter Database Endpoint:">
+				</div>
+			</div>
+			<p>https://www.ebi.ac.uk/rdf/services/atlas/sparql</p>
+			<br>
 		
-		<h2> Enter SPARQL Query: </h2>
-		<textarea name="comment" cols="100" rows="30" style="resize: none;" data-role="none" >
+			<div class="form-group">
+				<label for="queryarea"> Enter SPARQL Query:</label>  
+				<textarea class="form-control" id="queryarea" name="queryInput" cols="100" rows="20" style="resize: none;" data-role="none" >
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -108,179 +125,136 @@ SERVICE <http://cu.goa.bio2rdf.org/sparql> {
 BIND (IRI(CONCAT("GO:", REPLACE(str(?goid), "http://bio2rdf.org/go:", ""))) as ?gonum) 
 . }
 
-LIMIT 20
-			</textarea>
-		<br><br>
-  
-		Results per page : 
-		<select name="taskOption" id="taskOption">
-			<option value="40" <?php if( isset($_POST['taskOption']) && $_POST['taskOption'] == 40) echo "selected";?>>Write your own limit</option>
-			<option value="10" <?php if( isset($_POST['taskOption']) && $_POST['taskOption'] == 10) echo "selected";?>>30</option>
-			<option value="20" <?php if( isset($_POST['taskOption']) && $_POST['taskOption'] == 20) echo "selected";?>>50</option>
-			<option value="30" <?php if( isset($_POST['taskOption']) && $_POST['taskOption'] == 30) echo "selected";?>>70</option>	
-		</select>			
-		<br><br>
-		
-	
-      <input class="btn btn-sm btn-info " type="submit" name="submit" value="Show data">
-	  </div>
+LIMIT 2
+				</textarea>
+			</div>
+			<br><br>
+			<input class="btn btn-sm btn-info " type="submit" name="submit" value="Show data">
+		</div>
 
-	</form>
+		</form>
   
 
-
-	<?php
-	
-	session_start();  //---> used to store the variable for ex: fileName for the page
-	
-	
-	
-	//*************************** Results per page ***************************//
-		if($_POST['taskOption']=='10')
-		{
-			$sparql =  ($_POST['comment'] . 'LIMIT 30');
-		}
-			else if($_POST['taskOption']=='20')
-			{
-				$sparql =  $_POST['comment'] . 'LIMIT 50';
-			}
-			else if($_POST['taskOption']=='30')
-			{
-				$sparql =  $_POST['comment'] . 'LIMIT 70';
-			}
-			else if($_POST['taskOption']=='40')
-			{
-				$sparql =  $_POST['comment'] ;
-			}
-	//************************ End of Results per page ***********************//
-		
-	
-	//*************************** If the button selected is submit ***************************//	
-	if(isset($_POST['submit']))
-	{
-					
-		$c = uniqid (rand (),true); //---> generates random unique ids
-		$_SESSION['fileName']="/var/www/ant5/input/inputFile" . $c . ".txt";
-
-		require_once( "sparqlib.php" );  //---> load the SPARQL library
-		
-		//--->It connects to the endpoint database and if database is null it should print an error.
-		$db = sparql_connect( $_POST['database'] );  
-		if( !$db ) 
-		{ 
-			echo sparql_errno() . ": " . sparql_error(). "\n"; exit; 
-		}	
-		$result = sparql_query( $sparql ); 
-	
-		//--->If the $result, which is my table of data, is not displayed then a message is printed.
-		if( !$result ) 
-		{ 
-			//echo "Please select data to submit!"; exit; 
-		} 
-
-		$fields = sparql_field_array( $result );
  
-		echo "<div id=\"results\">";
-		echo "<p>Number of rows: ".sparql_num_rows( $result )." results.</p>";
-		echo "<table class =\"table table-striped\">";
-		echo "<tr>";
-		
-		foreach( $fields as $field ) //prints the columns names
+	<?php
+	//********************** If the button selected is submit ***********************//	
+	if(isset($_POST['submit']))
 		{
-			echo "<th>$field</th>";
-		}
-		echo "</tr>";
-	 
-		while( $row = sparql_fetch_array( $result ) )
-		{ 
-			$handle = fopen($_SESSION['fileName'], 'a'); // opens the file to append to it data
-			echo "<tr>";
-			//prints a row for n results
-			foreach( $fields as $field )
-			{	
-				echo "<td>$row[$field]</td>";
-				fwrite($handle, $row[$field]); //write to the file
-				fwrite($handle, "\t");	// tab between columns in the text file
+			require_once( "sparqlib.php" );  //---> load the SPARQL library
+			$sparql =  $_POST['queryInput'] ;
+			//--->It connects to the endpoint database and if database is null it should print an error.
+			if (empty($_POST['database'])){
+			 echo "Please select database to submit!"; exit;
 			}
-			fwrite($handle, "\n"); //next line in the text file 
+			$db = sparql_connect( $_POST['database'] );  
+			if( !$db ) 
+			{ 
+				echo sparql_errno() . ": " . sparql_error(). "\n"; exit; 
+			}	
+			$result = sparql_query( $sparql ); 
+			//--->If the $result, which is my table of data, is not displayed then a message is printed.
+			if( !$result ) 
+			{ 
+				echo "Please select data to submit!"; exit; 
+			} 
+			$fields = sparql_field_array( $result ); 
+			echo "<div id=\"results\">";
+			echo "<p>Number of Results: ".sparql_num_rows( $result )." results.</p>";
+			echo "<table class =\"table table-striped\">";
+			echo "<tr>";
+			foreach( $fields as $field ) //prints the columns names
+			{
+				echo "<th>$field</th>";
+			}
 			echo "</tr>";
-		}
-		echo "</table>";
-		echo "</div>";
-		fclose($handle);// close the file
-		echo "<br><br>";
-		
+			while( $row = sparql_fetch_array( $result ) )
+			{ 
+				echo "<tr>";
+				//prints a row for n results
+				foreach( $fields as $field )
+				{	
+					echo "<td>$row[$field]</td>";
+				}	 
+				echo "</tr>";
+			}
+			echo "</table>";
+			echo "</div>";
+			echo "<br><br>";
+?>	
+	 
+	 <script language="javascript">
+	$(document).ready(function(){
+		$("#bs-tooltip").tooltip({
+		title : 'For a better performance of the analysis you must leave this box blank.If you want a faster performance of the analysis you can fill the box, for example: 100.'
+		});
+	});
 
-	//*************************** Ontology selection ***************************//		
-
-
-		
-	//************************ End of Ontology selection ***********************//	
-
-		
-	//************* Four buttons of the test below the SPARQL query ************//
-	
-	   echo "<div class=\"container marketing\">";
-		echo "<div class=\"row\">";
-			echo "<div class=\"col-lg-3\">";
-				echo "<h3>Wilcoxon Test</h3>";
-				echo "<p>Details about the test.</p>";
-				echo "<form method=\"post\"><input class=\"btn btn-sm btn-primary \" type=\"submit\" name=\"test1\" value=\"TEST1\"> </form>";
-			echo "</div>"; //.col-lg-3 
-			echo "<div class=\"col-lg-3\">";
-				echo "<h3>Hyper Test</h3>";
-				echo "<p>Details about the test.</p>";
-				echo "<form method=\"post\"><input class=\"btn btn-sm btn-primary \" type=\"submit\" name=\"test2\" value=\"TEST2\"> </form>";
-			echo "</div>";//.col-lg-3 
-			echo "<div class=\"col-lg-3\">";
-				echo "<h3>Binomial Test</h3>";
-				echo "<p>Details about the test.</p>";
-				echo "<form method=\"post\"><input class=\"btn btn-sm btn-primary \" type=\"submit\" name=\"test3\" value=\"TEST3\"> </form>";
-			echo "</div>"; //.col-lg-3 
-			echo "<div class=\"col-lg-3\">";
-				echo "<h3>2x2contig Test</h3>";
-				echo "<p>Details about the test.</p>";
-				echo "<form method=\"post\"><input class=\"btn btn-sm btn-primary \" type=\"submit\" name=\"test4\" value=\"TEST4\"> </form>";
-			echo "</div>"; //.col-lg-3
-		echo "</div>"; //.row
-	  echo"</div>";
-	  
-	  //************************  End of the test buttons ************************//
-	  
-		
+	function submitForms(){
+		//document.getElementById("form12").submit();  
+	document.getElementById('hiddenquery').value=document.getElementById('queryarea').value;
+	document.getElementById('hiddenqueryD').value=document.getElementById('database').value;
+	document.getElementById('hiddenqueryP').value=document.getElementById('performance').value;
+	document.getElementById('hiddenqueryO').value=document.getElementById('ontology').value;
+	document.getElementById('form123').submit();
 	}
+</script>
+
+		<form id="form12" method="post">		
+			<select class="form-control" name="ontology" id="ontology">
+<?php
+			foreach(glob('../../../home/ant5/newstructures/structures/*', GLOB_ONLYDIR) as $dir) 
+			{
+				$dir = str_replace('../../../home/ant5/newstructures/structures/', ' ', $dir);
+				echo "<option value=".$dir.">".$dir."</option>";			
+			}
+?>  
+			</select>
+			<br><br>
 		
-	else if(isset($_POST['test1']))
-	{
-		$dirName1 = trim($_SESSION['fileName'], "/var/www/ant5/input/");
-	  $_SESSION['dirName'] = trim($dirName1, ".txt");
-	  $dirPath = "/var/www/ant5/output/".$_SESSION['dirName'] ;
-		$result = mkdir($dirPath, 0755);
-			if ($result == 1) {
-				echo $dirPath . " has been created";
-			} else {
-			echo $dirPath . " has NOT been created";}
-		$output = shell_exec('func_wilcoxon -i '.$_SESSION['fileName'].' -t /home/ant5/newstructures/structures/gene_ontology -o'.$dirPath.' -g owl:Thing -r 100');
-		header('Location: http://jagannath.pdn.cam.ac.uk/ant5/visualiseResults.php');
-	} 
-
-
-	?>
-<br>
+			<div class="input-group" >
+				<span class="input-group-addon">Performance of the test</span>
+				<input type="text" name="performance" id="performance" class="form-control">
+				<img src="info.png" id="bs-tooltip" data-toggle="tooltip" width="52" height="40">
+			</div>
+		</form>
 	
-	
+	   <div class="container marketing">
+			<div class="row">
+				<div class=col-lg-3>
+					<h3>Wilcoxon Test</h3>
+					<p>Details about the test.</p>
+					<form id="form123" method="post" action="visualiseResults2.php">
+					<input type=hidden name="thequery" id="hiddenquery" value=""/>
+					<input type=hidden name="thedatabase" id="hiddenqueryD" value=""/>
+					<input type=hidden name="theperformance" id="hiddenqueryP" value=""/>
+					<input type=hidden name="theonto" id="hiddenqueryO" value=""/>
+					<input class="btn btn-sm btn-primary " type="button" onClick="submitForms()" value="Test1"/>
+					<input type=hidden name="test1" value="TEST1"> </form>
+				</div>
+				<div class="col-lg-3">
+					<h3>Hyper Test</h3>
+					<p>Details about the test.</p>
+					<form method="post"><input class="btn btn-sm btn-primary " type="submit" name="test2" value="TEST2"> </form>
+				</div>
+				<div class="col-lg-3">
+					<h3>Binomial Test</h3>
+					<p>Details about the test.</p>
+					<form method="post"><input class="btn btn-sm btn-primary " type="submit" name="test3" value="TEST3"> </form>
+				</div>
+				<div class="col-lg-3">
+					<h3>2x2contig Test</h3>
+					<p>Details about the test.</p>
+					<form method="post"><input class="btn btn-sm btn-primary " type="submit" name="test4" value="TEST4"> </form>
+				</div>
+			</div>
+		</div>
 
-
-
-
-<!-- ***** THE PHP CODE END HERE ***** -->
-
-
+<?php } ?>
+		
       <div class="footer">
-        <p>&copy; ant5 2014</p>
+        <p>&copy; Ramona Tapi - ant5 </p>
       </div>
 
     </div> <!-- /container -->
-
   </body>
 </html>
