@@ -1,6 +1,37 @@
 <?php
-session_start();
-//echo $_POST["thequery"];
+
+	if(isset($_POST['test1'])||isset($_GET['test1']))
+		{
+			$c = uniqid (rand (),true); //---> generates random unique ids
+			//   $_SESSION['fileName']="/var/www/ant5/input/inputFile".$c.".txt";
+			echo '<a href="visualiseResults2.php?file=inputFile'.$c.'.txt">http://jagannath.pdn.cam.ac.uk/ant5/visualiseResults2.php?file=inputFile'.$c.'.txt</a>';
+			$sparql =  $_POST['thequery'] ;
+			$fp = fopen("/var/www/ant5/input/inputFile".$c.".txt-sparql","a");
+			fwrite($fp, $sparql);
+			fclose($fp);
+			$fp = fopen("/var/www/ant5/input/inputFile".$c.".txt-db","a");
+			fwrite($fp, $_POST['thedatabase']);
+			fclose($fp);
+			$fp = fopen("/var/www/ant5/input/inputFile".$c.".txt-onto","a");
+			fwrite($fp, $_POST['theonto']);
+			fclose($fp);
+			$fp = fopen("/var/www/ant5/input/inputFile".$c.".txt-performance","a");
+			fwrite($fp, $_POST['theperformance']);
+			fclose($fp);
+//exit(0);
+   //
+   shell_exec("php /var/www/ant5/runinbackground.php inputFile".$c.".txt > /dev/null 2>/dev/null &");
+  
+   //exit(0);
+
+  } else {
+  echo $_GET['file'];
+  
+    $outputDir = trim($_GET['file'], "input");
+	 $outputDir = trim($outputDir, ".txt");
+	
+	echo "  ". $outputDir ;
+  } 
 ?>
 
 <!DOCTYPE html>
@@ -21,10 +52,20 @@ session_start();
 	<script type="text/javascript" src="javascript/jquery.tablesorter.js"></script>
 	<script type="text/javascript" src="http://tablesorter.com/docs/js/chili/chili-1.8b.js"></script>
 
- 
+    <!-- Bootstrap core CSS -->
     <link href="bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
     <link href="jumbotron-narrow.css" rel="stylesheet">
 
+    <!-- Just for debugging purposes. Don't actually copy this line! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
 	
 	     <script type="text/javascript" id="js">
 		 
@@ -63,7 +104,7 @@ session_start();
 		</ol>
 		
 		<?php
-	$content = file('/var/www/ant5/output/'.$_GET['userid'].'/statistics.txt');
+	$content = file('/var/www/ant5/output/'.$outputDir.'/statistics.txt');
 	//First line: $content[0];
 	 $root_node = ltrim($content[7], "Root-Nodes:"); 
 	 $cutoff = ltrim($content[9], "Cutoff:"); 
@@ -97,16 +138,16 @@ session_start();
 		
 <?php
 
+exit(0);
 
-
-echo "the path is: ".$_SESSION['dirName'];
+echo "the path is: ".$outputDir;
 
 $row = 1;
-if (($handle = fopen("/var/www/ant5/output/".$_GET['userid']."/groups.txt", "r")) !== FALSE) {
+if (($handle = fopen("/var/www/ant5/output/".$outputDir."/groups.txt", "r")) !== FALSE) {
     
     while (($data = fgetcsv($handle, 1000, "\t")) !== FALSE) {
 		
-        $num = count($data);
+         $num = count($data);
         if ($row == 1) {
             $num = $num + 1 ;
             echo "<thead><tr>\n";
@@ -114,17 +155,17 @@ if (($handle = fopen("/var/www/ant5/output/".$_GET['userid']."/groups.txt", "r")
             echo "<tr>\n";
         }
 		
-        for ($c=1; $c < $num-1 ; $c++) {
+        for ($c=1; $c < $num ; $c++) {
             //echo $data[$c] . "<br />\n";
             if($data[$c] == null ) {
-               $value = "";
+               $value = "tab";
 			   
 			   
             }else{
                $value = $data[$c];
             }
-	    if( $value != "tab" ){
-                    if ($row == 1) {
+			if( $value != "tab" ){
+            if ($row == 1) {
 				if ($value == 'node_name')
 					{
 						echo '<th> Node Name </th>';
@@ -176,16 +217,18 @@ if (($handle = fopen("/var/www/ant5/output/".$_GET['userid']."/groups.txt", "r")
 					}
 				
             }else{
-                echo "\n<td>". $value."</td>\n";
+				
+                echo '<td>'. $value.'</td>';
+
 				
             }}
 			
         }
         
         if ($row == 1) {
-            echo "</tr>\n</thead><tbody>\n";
+            echo '</tr></thead><tbody>';
         }else{
-            echo "</tr>\n";
+            echo '</tr>';
         }
         $row++;
 		
@@ -214,6 +257,10 @@ if (($handle = fopen("/var/www/ant5/output/".$_GET['userid']."/groups.txt", "r")
 
   
 
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
   </body>
 </html>
 
